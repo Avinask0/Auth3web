@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3Auth Integration</title>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@5"></script>
+</head>
+<body>
+    <h1>Web3Auth Login</h1>
+    <button id="loginBtn">Login with Web3Auth</button>
+    <button id="logoutBtn">Logout</button>
+    <div id="userInfo"></div>
+
+    <script>
+        let web3auth;
+
+        async function initWeb3Auth() {
+            web3auth = new Web3Auth.Web3Auth({
+                clientId: "BPEqS9MV9gVwlKpNHphtIxHMhiapyy8rXKQ3KOxp6btABDoqK_Yj3SveAOEXEL0kNVPiDiN_b3OoGmHSeLvkXHE",  
+                chainConfig: { chainNamespace: "eip155", chainId: "0x1" }, // Ethereum Mainnet
+            });
+
+            try {
+                await web3auth.initModal();
+                console.log("Web3Auth initialized");
+            } catch (error) {
+                console.error("Web3Auth init failed:", error);
+            }
+        }
+
+        async function login() {
+            try {
+                const provider = await web3auth.connect();
+                console.log("Logged in:", provider);
+                document.getElementById("userInfo").innerHTML = "Logged in as: " + provider.userInfo.name;
+            } catch (error) {
+                console.error("Login failed:", error);
+            }
+        }
+
+        async function logout() {
+            try {
+                await web3auth.logout();
+                console.log("Logged out");
+                document.getElementById("userInfo").innerHTML = "Logged out.";
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
+        }
+
+        document.getElementById("loginBtn").addEventListener("click", login);
+        document.getElementById("logoutBtn").addEventListener("click", logout);
+
+        window.onload = initWeb3Auth;
+    </script>
+</body>
+</html>
