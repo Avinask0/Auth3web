@@ -13,9 +13,11 @@
     <div id="userInfo"></div>
 
     <script>
-        let web3auth;
+        window.onload = async function() {
+            const { Web3Auth } = window.Web3Auth;
+            let web3auth;
 
-        async function initWeb3Auth() {
+            // Web3Auth Initialization
             web3auth = new Web3Auth.Web3Auth({
                 clientId: "BPEqS9MV9gVwlKpNHphtIxHMhiapyy8rXKQ3KOxp6btABDoqK_Yj3SveAOEXEL0kNVPiDiN_b3OoGmHSeLvkXHE",  
                 chainConfig: { chainNamespace: "eip155", chainId: "0x1" }, // Ethereum Mainnet
@@ -23,36 +25,37 @@
 
             try {
                 await web3auth.initModal();
-                console.log("Web3Auth initialized");
+                console.log("Web3Auth initialized successfully.");
             } catch (error) {
-                console.error("Web3Auth init failed:", error);
+                console.error("Web3Auth initialization failed:", error);
             }
-        }
 
-        async function login() {
-            try {
-                const provider = await web3auth.connect();
-                console.log("Logged in:", provider);
-                document.getElementById("userInfo").innerHTML = "Logged in as: " + provider.userInfo.name;
-            } catch (error) {
-                console.error("Login failed:", error);
+            // Login Function
+            async function login() {
+                try {
+                    const provider = await web3auth.connect();
+                    console.log("Logged in:", provider);
+                    document.getElementById("userInfo").innerHTML = "Logged in as: " + provider.userInfo.name;
+                } catch (error) {
+                    console.error("Login failed:", error);
+                }
             }
-        }
 
-        async function logout() {
-            try {
-                await web3auth.logout();
-                console.log("Logged out");
-                document.getElementById("userInfo").innerHTML = "Logged out.";
-            } catch (error) {
-                console.error("Logout failed:", error);
+            // Logout Function
+            async function logout() {
+                try {
+                    await web3auth.logout();
+                    console.log("Logged out.");
+                    document.getElementById("userInfo").innerHTML = "Logged out.";
+                } catch (error) {
+                    console.error("Logout failed:", error);
+                }
             }
+
+            // Button Event Listeners
+            document.getElementById("loginBtn").addEventListener("click", login);
+            document.getElementById("logoutBtn").addEventListener("click", logout);
         }
-
-        document.getElementById("loginBtn").addEventListener("click", login);
-        document.getElementById("logoutBtn").addEventListener("click", logout);
-
-        window.onload = initWeb3Auth;
     </script>
 </body>
 </html>
