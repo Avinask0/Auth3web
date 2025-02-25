@@ -13,13 +13,10 @@
 </head>
 <body>
     <h2>Login with Magic & Create a Polygon Wallet</h2>
-
+    
     <input type="email" id="email" placeholder="Enter your email" />
-    <label>
-        <input type="checkbox" id="rememberMe"> Remember Me
-    </label>
     <button onclick="login()">Login</button>
-
+    
     <h3 id="status"></h3>
     <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Logged In</span></p>
     <button onclick="logout()">Logout</button>
@@ -33,6 +30,7 @@
                 const provider = new ethers.providers.Web3Provider(magic.rpcProvider);
                 const signer = provider.getSigner();
                 const walletAddress = await signer.getAddress();
+
                 document.getElementById("status").innerText = "Logged in!";
                 document.getElementById("walletAddress").innerText = walletAddress;
             }
@@ -40,15 +38,13 @@
 
         async function login() {
             const email = document.getElementById("email").value;
-            const rememberMe = document.getElementById("rememberMe").checked;
-
             if (!email) {
                 alert("Please enter an email");
                 return;
             }
 
             try {
-                await magic.auth.loginWithMagicLink({ email, showUI: rememberMe });
+                await magic.auth.loginWithMagicLink({ email });
                 checkLoginStatus();
             } catch (error) {
                 console.error("Login error:", error);
@@ -62,7 +58,7 @@
             document.getElementById("walletAddress").innerText = "Not Logged In";
         }
 
-        // Auto-check login status on page load
+        // Check if user is already logged in when the page loads
         checkLoginStatus();
     </script>
 </body>
