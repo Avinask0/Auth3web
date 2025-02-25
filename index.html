@@ -34,17 +34,12 @@
         ];
 
         async function checkLoginStatus() {
-            const isLoggedIn = await magic.user.isLoggedIn();
-            if (isLoggedIn) {
-                const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
-                const signer = magicProvider.getSigner();
-                const walletAddress = await signer.getAddress();
+            const storedAddress = localStorage.getItem("walletAddress");
+            if (storedAddress) {
                 document.getElementById("status").innerText = "Logged in!";
-                document.getElementById("walletAddress").innerText = walletAddress;
-
-                // Fetch MATIC & BUBET balances
-                getMaticBalance(walletAddress);
-                getBubetBalance(walletAddress);
+                document.getElementById("walletAddress").innerText = storedAddress;
+                getMaticBalance(storedAddress);
+                getBubetBalance(storedAddress);
             }
         }
 
@@ -69,7 +64,18 @@
 
             try {
                 await magic.auth.loginWithMagicLink({ email });
-                checkLoginStatus();
+                const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
+                const signer = magicProvider.getSigner();
+                const walletAddress = await signer.getAddress();
+
+                // Save wallet address locally
+                localStorage.setItem("walletAddress", walletAddress);
+
+                document.getElementById("status").innerText = "Logged in!";
+                document.getElementById("walletAddress").innerText = walletAddress;
+
+                getMaticBalance(walletAddress);
+                getBubetBalance(walletAddress);
             } catch (error) {
                 console.error("Login error:", error);
                 alert("Login failed. Check the console for details.");
@@ -78,13 +84,14 @@
 
         async function logout() {
             await magic.user.logout();
+            localStorage.removeItem("walletAddress"); // Remove from local storage
             document.getElementById("status").innerText = "Logged out";
             document.getElementById("walletAddress").innerText = "Not Logged In";
             document.getElementById("maticBalance").innerText = "--";
             document.getElementById("bubetBalance").innerText = "--";
         }
 
-        // Check if user is already logged in when the page loads
+        // Restore session on page load
         checkLoginStatus();
     </script>
 </body>
