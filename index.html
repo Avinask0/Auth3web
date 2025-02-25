@@ -6,6 +6,7 @@
     <title>Magic Login - Polygon Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         input, button { margin: 10px; padding: 10px; }
@@ -24,6 +25,11 @@
     
     <button onclick="logout()">Logout</button>
 
+    <!-- Input for user to enter number and request -->
+    <h3>Save Data to IPFS</h3>
+    <input type="number" id="userNumber" placeholder="Enter a number" />
+    <button onclick="saveToPinata()">Request</button>
+
     <script>
         const magic = new Magic("pk_live_E0C2532AEA69C41D", { network: "polygon" });
         const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
@@ -32,6 +38,9 @@
             "function balanceOf(address owner) view returns (uint256)",
             "function decimals() view returns (uint8)"
         ];
+
+        const PINATA_API_KEY = "31ebcd0a1c0bb1cb20cc";
+        const PINATA_SECRET_API_KEY = "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224";
 
         async function checkLoginStatus() {
             const storedAddress = localStorage.getItem("walletAddress");
@@ -89,6 +98,44 @@
             document.getElementById("walletAddress").innerText = "Not Logged In";
             document.getElementById("maticBalance").innerText = "--";
             document.getElementById("bubetBalance").innerText = "--";
+        }
+
+        async function saveToPinata() {
+            const userNumber = document.getElementById("userNumber").value;
+            const walletAddress = localStorage.getItem("walletAddress");
+
+            if (!walletAddress) {
+                alert("You must be logged in first!");
+                return;
+            }
+
+            if (!userNumber) {
+                alert("Please enter a number");
+                return;
+            }
+
+            const data = {
+                walletAddress: walletAddress,
+                number: userNumber,
+                timestamp: new Date().toISOString()
+            };
+
+            const pinataUrl = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
+
+            try {
+                await axios.post(pinataUrl, data, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "pinata_api_key": 31ebcd0a1c0bb1cb20cc,
+                        "pinata_secret_api_key": 0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224
+                    }
+                });
+
+                alert("Data saved to IPFS successfully!");
+            } catch (error) {
+                console.error("Error saving to Pinata:", error);
+                alert("Failed to save data to IPFS. Check console for details.");
+            }
         }
 
         // Restore session on page load
