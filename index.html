@@ -19,21 +19,45 @@
     
     <h3 id="status"></h3>
     <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Logged In</span></p>
+    <p><strong>MATIC Balance:</strong> <span id="maticBalance">--</span></p>
+    <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
+    
     <button onclick="logout()">Logout</button>
 
     <script>
         const magic = new Magic("pk_live_E0C2532AEA69C41D", { network: "polygon" });
+        const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
+        const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
+        const ERC20_ABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function decimals() view returns (uint8)"
+        ];
 
         async function checkLoginStatus() {
             const isLoggedIn = await magic.user.isLoggedIn();
             if (isLoggedIn) {
-                const provider = new ethers.providers.Web3Provider(magic.rpcProvider);
-                const signer = provider.getSigner();
+                const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
+                const signer = magicProvider.getSigner();
                 const walletAddress = await signer.getAddress();
-
                 document.getElementById("status").innerText = "Logged in!";
                 document.getElementById("walletAddress").innerText = walletAddress;
+
+                // Fetch MATIC & BUBET balances
+                getMaticBalance(walletAddress);
+                getBubetBalance(walletAddress);
             }
+        }
+
+        async function getMaticBalance(walletAddress) {
+            const balance = await provider.getBalance(walletAddress);
+            document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " MATIC";
+        }
+
+        async function getBubetBalance(walletAddress) {
+            const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
+            const balance = await contract.balanceOf(walletAddress);
+            const decimals = await contract.decimals();
+            document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
         }
 
         async function login() {
@@ -56,6 +80,8 @@
             await magic.user.logout();
             document.getElementById("status").innerText = "Logged out";
             document.getElementById("walletAddress").innerText = "Not Logged In";
+            document.getElementById("maticBalance").innerText = "--";
+            document.getElementById("bubetBalance").innerText = "--";
         }
 
         // Check if user is already logged in when the page loads
