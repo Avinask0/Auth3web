@@ -20,7 +20,9 @@
             text-align: center;
             position: relative;
         }
+
         .hidden { display: none; }
+
         .top-right-menu {
             position: absolute;
             top: 10px;
@@ -28,6 +30,7 @@
             display: flex;
             gap: 10px;
         }
+
         button { 
             padding: 10px 15px; 
             cursor: pointer; 
@@ -37,7 +40,9 @@
             border-radius: 5px;
             font-size: 16px;
         }
+
         button:hover { background: #0056b3; }
+
         #loginScreen {
             background: white;
             padding: 30px;
@@ -46,6 +51,7 @@
             text-align: center;
             min-width: 300px;
         }
+
         input {
             padding: 10px;
             margin: 10px;
@@ -54,12 +60,14 @@
             width: 100%;
             font-size: 16px;
         }
+
         #appScreen {
             width: 100%;
             max-width: 400px;
             text-align: center;
             padding-top: 60px;
         }
+
         .balance-container {
             background: white;
             padding: 20px;
@@ -69,6 +77,7 @@
             text-align: left;
             width: 100%;
         }
+
         .cabin {
             background: white;
             padding: 20px;
@@ -77,7 +86,9 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 100%;
         }
+
         .cabin h3 { margin-top: 20px; }
+
         @media (max-width: 600px) {
             .top-right-menu {
                 flex-direction: column;
@@ -117,7 +128,6 @@
             <h3>Request Bubbets</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
             <button onclick="sendToPinata()">Request Bubbets</button>
-            <p id="pinataHash"></p>
         </div>
     </div>
 
@@ -126,8 +136,6 @@
         const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
         const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
         const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
-        const PINATA_API_KEY = "your-pinata-api-key";
-        const PINATA_SECRET_API_KEY = "your-pinata-secret-key";
 
         function showLoginScreen() {
             document.getElementById("loginScreen").classList.remove("hidden");
@@ -166,31 +174,11 @@
             }
         }
 
-        async function sendToPinata() {
-            const walletAddress = localStorage.getItem("walletAddress");
-            const userNumber = document.getElementById("userNumber").value;
-
-            if (!walletAddress || !userNumber) {
-                alert("Please enter a number and ensure you're logged in.");
-                return;
-            }
-
-            try {
-                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
-                    pinataContent: { wallet: walletAddress, number: userNumber },
-                    pinataMetadata: { name: "BUBET_Request" }
-                }, {
-                    headers: {
-                        "pinata_api_key": PINATA_API_KEY,
-                        "pinata_secret_api_key": PINATA_SECRET_API_KEY
-                    }
-                });
-
-                document.getElementById("pinataHash").innerText = "IPFS Hash: " + response.data.IpfsHash;
-            } catch (error) {
-                console.error("Pinata upload failed:", error);
-                alert("Failed to upload to Pinata.");
-            }
+        async function getBubetBalance(walletAddress) {
+            const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
+            const balance = await contract.balanceOf(walletAddress);
+            const decimals = await contract.decimals();
+            return ethers.utils.formatUnits(balance, decimals);
         }
 
         async function login() {
@@ -215,6 +203,14 @@
             await magic.user.logout();
             localStorage.clear();
             showLoginScreen();
+        }
+
+        async function toggleCabin() {
+            const cabinScreen = document.getElementById("cabinScreen");
+            if (cabinScreen.classList.contains("hidden")) {
+                await fetchBalances();
+            }
+            cabinScreen.classList.toggle("hidden");
         }
     </script>
 </body>
