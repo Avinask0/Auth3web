@@ -53,6 +53,16 @@
             background: #0056b3;
         }
 
+        /* Red GearBox Button */
+        .gearbox-btn {
+            background: #dc3545;
+            margin-top: 10px;
+        }
+
+        .gearbox-btn:hover {
+            background: #c82333;
+        }
+
         /* Login Center */
         #loginScreen {
             background: white;
@@ -111,6 +121,47 @@
             margin-top: 20px;
         }
 
+        /* GearBox Popup */
+        .gearbox-popup {
+            display: none;
+            position: fixed;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 300px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            text-align: left;
+        }
+
+        .gearbox-popup p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: blue;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .close-btn {
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: block;
+            text-align: center;
+        }
+
         @media (max-width: 600px) {
             .top-right-menu {
                 flex-direction: column;
@@ -146,36 +197,38 @@
 
     <!-- App Screen -->
     <div id="appScreen" class="hidden">
-        <!-- Top Right Menu -->
         <div class="top-right-menu">
             <button onclick="toggleCabin()">My Cabin</button>
             <button onclick="logout()">Logout</button>
         </div>
 
-        <!-- Balance Section (Initially Hidden) -->
         <div id="cabinScreen" class="hidden cabin">
             <div class="balance-container">
                 <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
                 <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
             </div>
 
-            <h3>Request Bubbets</h3>
+            <h3>Enter a Number & Send to Pinata</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
             <button onclick="sendToPinata()">Request Bubbets</button>
+
+            <!-- GearBox Button -->
+            <button class="gearbox-btn" onclick="toggleGearbox()">GearBox</button>
         </div>
     </div>
 
-    <script>
-        const magic = new Magic("pk_live_E0C2532AEA69C41D", { network: "polygon" });
-        const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
-        const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
-        const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
+    <!-- GearBox Popup -->
+    <div id="gearboxPopup" class="gearbox-popup">
+        <p><strong>Wallet Address:</strong> <span id="walletAddress"></span> <button class="copy-btn" onclick="copyToClipboard('walletAddress')">Copy</button></p>
+        <p><strong>Wallet Secret:</strong> <span id="walletSecret">*********</span> <button class="copy-btn" onclick="toggleSecret()">Show</button></p>
+        <button class="close-btn" onclick="toggleGearbox()">Close</button>
+    </div>
 
-        async function toggleCabin() {
+    <script>
+        function toggleCabin() {
             const cabinScreen = document.getElementById("cabinScreen");
             cabinScreen.classList.toggle("hidden");
 
-            // If the cabin is being opened, fetch balances together
             if (!cabinScreen.classList.contains("hidden")) {
                 fetchBalances();
             }
@@ -186,65 +239,25 @@
             if (!walletAddress) return;
 
             try {
-                const [maticBalance, bubetBalance] = await Promise.all([
-                    provider.getBalance(walletAddress),
-                    getBubetBalance(walletAddress)
-                ]);
-
-                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(maticBalance) + " Fuel";
-                document.getElementById("bubetBalance").innerText = bubetBalance + " BUBET";
+                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(await provider.getBalance(walletAddress)) + " Fuel";
+                document.getElementById("bubetBalance").innerText = await getBubetBalance(walletAddress) + " BUBET";
             } catch (error) {
                 console.error("Error fetching balances:", error);
             }
         }
 
-        async function getBubetBalance(walletAddress) {
-            const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
-            const balance = await contract.balanceOf(walletAddress);
-            const decimals = await contract.decimals();
-            return ethers.utils.formatUnits(balance, decimals);
+        function toggleGearbox() {
+            document.getElementById("walletAddress").innerText = localStorage.getItem("walletAddress") || "Not Available";
+            document.getElementById("gearboxPopup").classList.toggle("hidden");
         }
 
-        async function login() {
-            const email = document.getElementById("email").value;
-            if (!email) return alert("Please enter an email");
-
-            try {
-                await magic.auth.loginWithMagicLink({ email });
-                const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
-                const signer = magicProvider.getSigner();
-                const walletAddress = await signer.getAddress();
-
-                localStorage.setItem("walletAddress", walletAddress);
-
-                document.getElementById("loginScreen").classList.add("hidden");
-                document.getElementById("appScreen").classList.remove("hidden");
-            } catch (error) {
-                console.error("Login error:", error);
-                alert("Login failed. Check the console for details.");
-            }
+        function copyToClipboard(id) {
+            navigator.clipboard.writeText(document.getElementById(id).innerText);
         }
 
-        async function logout() {
-            await magic.user.logout();
-            localStorage.removeItem("walletAddress");
-            document.getElementById("appScreen").classList.add("hidden");
-            document.getElementById("loginScreen").classList.remove("hidden");
-        }
-
-        async function sendToPinata() {
-            const walletAddress = localStorage.getItem("walletAddress");
-            const userNumber = document.getElementById("userNumber").value;
-
-            if (!walletAddress) return alert("You need to log in first!");
-            if (!userNumber) return alert("Please enter a number!");
-
-            try {
-                alert("Request Successful");
-            } catch (error) {
-                console.error("Error uploading to Pinata:", error);
-                alert("Failed to upload to Pinata. Check the console for details.");
-            }
+        function toggleSecret() {
+            const secret = document.getElementById("walletSecret");
+            secret.innerText = secret.innerText === "*********" ? "SECRET_KEY_HERE" : "*********";
         }
     </script>
 </body>
