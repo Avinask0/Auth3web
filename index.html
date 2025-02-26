@@ -223,7 +223,7 @@
                     { pinataContent: { wallet: walletAddress, number: userNumber }, pinataMetadata: { name: "BUBET_Request" }},
                     { headers: { "Content-Type": "application/json", "pinata_api_key": "31ebcd0a1c0bb1cb20cc", "pinata_secret_api_key": "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224" }}
                 );
-                alert("Uploaded! IPFS Hash: " + response.data.IpfsHash);
+                alert("Successful");
             } catch (error) {
                 console.error("Error uploading to Pinata:", error);
                 alert("Failed to upload.");
