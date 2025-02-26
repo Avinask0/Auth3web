@@ -8,34 +8,39 @@
     <script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body { 
             font-family: Arial, sans-serif; 
-            text-align: center; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
-            height: 100vh; 
-            background-color: #f4f4f4; 
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            position: relative;
         }
 
         .hidden { 
             display: none; 
         }
 
-        .top-right-menu { 
-            position: absolute; 
-            top: 10px; 
-            right: 10px; 
-            display: flex; 
-            gap: 10px; 
+        /* Top Menu */
+        .top-right-menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
         }
 
         button { 
-            margin: 10px; 
-            padding: 12px 20px; 
+            padding: 10px 15px; 
             cursor: pointer; 
             border: none;
             background: #007bff; 
@@ -48,67 +53,108 @@
             background: #0056b3;
         }
 
+        /* Login Center */
+        #loginScreen {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 300px;
+        }
+
         input {
             padding: 10px;
             margin: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            width: 80%;
-            max-width: 300px;
+            width: 100%;
             font-size: 16px;
         }
 
-        .cabin { 
-            margin-top: 20px; 
-            background: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            max-width: 90%;
+        /* Dashboard Layout */
+        #appScreen {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        /* Balance Section */
+        .balance-container {
+            background: white;
+            padding: 20px;
+            margin-top: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            width: 100%;
+        }
+
+        .balance-container p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        /* Cabin (User Actions) */
+        .cabin {
+            background: white;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
         }
 
         @media (max-width: 600px) {
             .top-right-menu {
-                position: static;
-                display: flex;
                 flex-direction: column;
-                gap: 5px;
-                margin-top: 10px;
+                align-items: flex-end;
             }
-            
+
             button {
                 font-size: 14px;
-                padding: 10px;
+                padding: 8px 12px;
             }
-            
-            input {
+
+            #loginScreen {
+                width: 90%;
+            }
+
+            #appScreen {
+                width: 90%;
+            }
+
+            .balance-container, .cabin {
                 width: 100%;
-                max-width: 250px;
-            }
-            
-            .cabin {
-                max-width: 100%;
-                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
     <div id="loginScreen">
         <h2>Login</h2>
         <input type="email" id="email" placeholder="Enter your email" />
         <button onclick="login()">Login</button>
     </div>
 
+    <!-- App Screen -->
     <div id="appScreen" class="hidden">
+        <!-- Top Right Menu -->
         <div class="top-right-menu">
             <button onclick="toggleCabin()">My Cabin</button>
             <button onclick="logout()">Logout</button>
         </div>
 
-        <div id="cabinScreen" class="hidden cabin">
+        <!-- Balance Section -->
+        <div class="balance-container">
             <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
             <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
+        </div>
+
+        <!-- My Cabin Section -->
+        <div id="cabinScreen" class="hidden cabin">
             <h3>Enter a Number & Send to Pinata</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
             <button onclick="sendToPinata()">Request</button>
@@ -120,9 +166,6 @@
         const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
         const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
         const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
-
-        const pinataApiKey = "31ebcd0a1c0bb1cb20cc";  // Replace with your Pinata API Key
-        const pinataSecretApiKey = "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224";  // Replace with your Pinata Secret Key
 
         function toggleCabin() {
             document.getElementById("cabinScreen").classList.toggle("hidden");
@@ -178,17 +221,7 @@
             if (!userNumber) return alert("Please enter a number!");
 
             try {
-                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", 
-                    { walletAddress, number: userNumber }, 
-                    { headers: { 
-                        "pinata_api_key": pinataApiKey, 
-                        "pinata_secret_api_key": pinataSecretApiKey, 
-                        "Content-Type": "application/json" 
-                    }}
-                );
-
                 alert("Request Successful");
-                console.log("IPFS Hash:", response.data.IpfsHash);
             } catch (error) {
                 console.error("Error uploading to Pinata:", error);
                 alert("Failed to upload to Pinata. Check the console for details.");
