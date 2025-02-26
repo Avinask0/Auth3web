@@ -154,10 +154,10 @@
 
         async function toggleCabin() {
             const cabinScreen = document.getElementById("cabinScreen");
-            cabinScreen.classList.toggle("hidden");
-            if (!cabinScreen.classList.contains("hidden")) {
-                fetchBalances();
+            if (cabinScreen.classList.contains("hidden")) {
+                await fetchBalances(); // Fetch balances only when opening the cabin
             }
+            cabinScreen.classList.toggle("hidden");
         }
 
         async function fetchBalances() {
@@ -205,29 +205,24 @@
         }
 
         async function logout() {
-            await magic.user.logout();
-            localStorage.removeItem("walletAddress");
-            document.getElementById("appScreen").classList.add("hidden");
-            document.getElementById("loginScreen").classList.remove("hidden");
+            try {
+                await magic.user.logout();
+            } catch (error) {
+                console.error("Logout error:", error);
+            }
+
+            // Clear all cached data and reload the page
+            localStorage.clear();
+            sessionStorage.clear();
+            document.cookie.split(";").forEach((c) => {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+
+            location.reload(); // Force a full refresh
         }
 
         async function sendToPinata() {
-            const walletAddress = localStorage.getItem("walletAddress");
-            const userNumber = document.getElementById("userNumber").value;
-
-            if (!walletAddress) return alert("You need to log in first!");
-            if (!userNumber) return alert("Please enter a number!");
-
-            try {
-                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", 
-                    { pinataContent: { wallet: walletAddress, number: userNumber }, pinataMetadata: { name: "BUBET_Request" }},
-                    { headers: { "Content-Type": "application/json", "pinata_api_key": "31ebcd0a1c0bb1cb20cc", "pinata_secret_api_key": "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224" }}
-                );
-                alert("Successful");
-            } catch (error) {
-                console.error("Error uploading to Pinata:", error);
-                alert("Failed to upload.");
-            }
+            alert("Bubbet request feature is not yet implemented.");
         }
     </script>
 </body>
