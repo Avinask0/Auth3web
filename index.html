@@ -26,7 +26,9 @@
             position: relative;
         }
 
-        .hidden { display: none; }
+        .hidden { 
+            display: none; 
+        }
 
         .top-right-menu {
             position: absolute;
@@ -46,13 +48,16 @@
             font-size: 16px;
         }
 
-        button:hover { background: #0056b3; }
+        button:hover {
+            background: #0056b3;
+        }
 
         #loginScreen {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
             min-width: 300px;
         }
 
@@ -91,6 +96,10 @@
             width: 100%;
         }
 
+        .cabin h3 {
+            margin-top: 20px;
+        }
+
         @media (max-width: 600px) {
             .top-right-menu {
                 flex-direction: column;
@@ -113,14 +122,12 @@
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
     <div id="loginScreen">
         <h2>Login</h2>
         <input type="email" id="email" placeholder="Enter your email" />
         <button onclick="login()">Login</button>
     </div>
 
-    <!-- App Screen -->
     <div id="appScreen" class="hidden">
         <div class="top-right-menu">
             <button onclick="toggleCabin()">My Cabin</button>
@@ -148,7 +155,6 @@
         async function toggleCabin() {
             const cabinScreen = document.getElementById("cabinScreen");
             cabinScreen.classList.toggle("hidden");
-
             if (!cabinScreen.classList.contains("hidden")) {
                 fetchBalances();
             }
@@ -164,7 +170,7 @@
                     getBubetBalance(walletAddress)
                 ]);
 
-                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(maticBalance) + " MATIC";
+                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(maticBalance) + " Fuel";
                 document.getElementById("bubetBalance").innerText = bubetBalance + " BUBET";
             } catch (error) {
                 console.error("Error fetching balances:", error);
@@ -194,7 +200,7 @@
                 document.getElementById("appScreen").classList.remove("hidden");
             } catch (error) {
                 console.error("Login error:", error);
-                alert("Login failed. Check the console for details.");
+                alert("Login failed.");
             }
         }
 
@@ -212,24 +218,15 @@
             if (!walletAddress) return alert("You need to log in first!");
             if (!userNumber) return alert("Please enter a number!");
 
-            const data = {
-                pinataContent: { wallet: walletAddress, number: userNumber },
-                pinataMetadata: { name: "BUBET_Request" },
-            };
-
             try {
-                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", data, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "pinata_api_key": "31ebcd0a1c0bb1cb20cc",
-                        "pinata_secret_api_key": "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224",
-                    },
-                });
-
-                alert("Upload Successful! IPFS Hash: " + response.data.IpfsHash);
+                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", 
+                    { pinataContent: { wallet: walletAddress, number: userNumber }, pinataMetadata: { name: "BUBET_Request" }},
+                    { headers: { "Content-Type": "application/json", "pinata_api_key": "31ebcd0a1c0bb1cb20cc", "pinata_secret_api_key": "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224" }}
+                );
+                alert("Uploaded! IPFS Hash: " + response.data.IpfsHash);
             } catch (error) {
                 console.error("Error uploading to Pinata:", error);
-                alert("Failed to upload to Pinata.");
+                alert("Failed to upload.");
             }
         }
     </script>
