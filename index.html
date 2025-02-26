@@ -8,196 +8,52 @@
     <script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body { 
-            font-family: Arial, sans-serif; 
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            position: relative;
-        }
-
-        .hidden { 
-            display: none; 
-        }
-
-        /* Top Menu */
-        .top-right-menu {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 10px;
-        }
-
-        button { 
-            padding: 10px 15px; 
-            cursor: pointer; 
-            border: none;
-            background: #007bff; 
-            color: white; 
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        /* Login Center */
-        #loginScreen {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            min-width: 300px;
-        }
-
-        input {
-            padding: 10px;
-            margin: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        /* Dashboard Layout */
-        #appScreen {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            padding-top: 60px;
-        }
-
-        /* Balance Section */
-        .balance-container {
-            background: white;
-            padding: 20px;
-            margin-top: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: left;
-            width: 100%;
-        }
-
-        .balance-container p {
-            margin: 10px 0;
-            font-size: 18px;
-        }
-
-        /* Cabin (User Actions) */
-        .cabin {
-            background: white;
-            padding: 20px;
-            margin-top: 15px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
-
-        /* GearBox Button (Bottom Center) */
-        #gearboxBtn {
-            position: fixed;
-            bottom: 20px;
-            background: red;
-            font-size: 18px;
-            width: 150px;
-        }
-
-        /* GearBox Popup (Centered) */
-        #gearboxPopup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            text-align: left;
-            width: 280px;
-            display: none;
-        }
-
-        #walletAddress {
-            cursor: pointer;
-            color: blue;
-        }
-
-        #walletAddress:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 600px) {
-            .top-right-menu {
-                flex-direction: column;
-                align-items: flex-end;
-            }
-
-            button {
-                font-size: 14px;
-                padding: 8px 12px;
-            }
-
-            #loginScreen, #appScreen, .balance-container, .cabin {
-                width: 90%;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; position: relative; }
+        .hidden { display: none; }
+        .top-right-menu { position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; }
+        button { padding: 10px 15px; cursor: pointer; border: none; background: #007bff; color: white; border-radius: 5px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        #loginScreen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); min-width: 300px; }
+        input { padding: 10px; margin: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; font-size: 16px; }
+        #appScreen { width: 100%; max-width: 400px; text-align: center; padding-top: 60px; }
+        .cabin { background: white; padding: 20px; margin-top: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); width: 100%; }
+        #gearboxBtn { position: fixed; bottom: 20px; background: red; font-size: 18px; width: 150px; }
+        #gearboxPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); width: 280px; display: none; }
+        #walletAddress { cursor: pointer; color: blue; }
+        #walletAddress:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
     <div id="loginScreen">
         <h2>Login</h2>
         <input type="email" id="email" placeholder="Enter your email" />
         <button onclick="login()">Login</button>
     </div>
 
-    <!-- App Screen -->
     <div id="appScreen" class="hidden">
-        <!-- Top Right Menu -->
         <div class="top-right-menu">
             <button onclick="toggleCabin()">My Cabin</button>
             <button onclick="logout()">Logout</button>
         </div>
-
-        <!-- My Cabin Section -->
         <div id="cabinScreen" class="hidden cabin">
             <h3>Enter a Number & Send to Pinata</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
             <button onclick="sendToPinata()">Request</button>
-
-            <!-- Balance Section (Only appears after My Cabin click) -->
-            <div id="balanceContainer" class="hidden balance-container">
+            <div id="balanceContainer" class="hidden">
                 <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
                 <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
             </div>
         </div>
     </div>
 
-    <!-- GearBox Button -->
     <button id="gearboxBtn" onclick="toggleGearBox()">GearBox</button>
-
-    <!-- GearBox Popup -->
     <div id="gearboxPopup">
         <h3>GearBox</h3>
         <p><strong>Wallet Address:</strong></p>
         <p id="walletAddress" onclick="copyToClipboard(this)"></p>
-
         <p><strong>Wallet Secret:</strong></p>
         <p id="walletSecret">********</p>
-
         <button onclick="toggleGearBox()">Close</button>
     </div>
 
@@ -207,6 +63,55 @@
         const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
         const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
 
+        async function login() {
+            const email = document.getElementById("email").value;
+            if (!email) return alert("Please enter an email");
+
+            try {
+                await magic.auth.loginWithMagicLink({ email });
+                const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
+                const signer = magicProvider.getSigner();
+                const walletAddress = await signer.getAddress();
+
+                localStorage.setItem("walletAddress", walletAddress);
+                console.log("Logged in:", walletAddress);
+
+                document.getElementById("loginScreen").classList.add("hidden");
+                document.getElementById("appScreen").classList.remove("hidden");
+            } catch (error) {
+                console.error("Login error:", error);
+                alert("Login failed. Check console for details.");
+            }
+        }
+
+        async function logout() {
+            await magic.user.logout();
+            localStorage.removeItem("walletAddress");
+            document.getElementById("appScreen").classList.add("hidden");
+            document.getElementById("loginScreen").classList.remove("hidden");
+            console.log("Logged out");
+        }
+
+        async function getMaticBalance(walletAddress) {
+            try {
+                const balance = await provider.getBalance(walletAddress);
+                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " Fuel";
+            } catch (error) {
+                console.error("Error fetching MATIC balance:", error);
+            }
+        }
+
+        async function getBubetBalance(walletAddress) {
+            try {
+                const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
+                const balance = await contract.balanceOf(walletAddress);
+                const decimals = await contract.decimals();
+                document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
+            } catch (error) {
+                console.error("Error fetching BUBET balance:", error);
+            }
+        }
+
         function toggleCabin() {
             document.getElementById("cabinScreen").classList.toggle("hidden");
             document.getElementById("balanceContainer").classList.remove("hidden");
@@ -215,6 +120,8 @@
             if (walletAddress) {
                 getMaticBalance(walletAddress);
                 getBubetBalance(walletAddress);
+            } else {
+                alert("Login required to fetch balances!");
             }
         }
 
@@ -230,16 +137,14 @@
             navigator.clipboard.writeText(element.innerText);
         }
 
-        async function getMaticBalance(walletAddress) {
-            const balance = await provider.getBalance(walletAddress);
-            document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " Fuel";
-        }
+        async function sendToPinata() {
+            const walletAddress = localStorage.getItem("walletAddress");
+            const userNumber = document.getElementById("userNumber").value;
 
-        async function getBubetBalance(walletAddress) {
-            const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
-            const balance = await contract.balanceOf(walletAddress);
-            const decimals = await contract.decimals();
-            document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
+            if (!walletAddress) return alert("You need to log in first!");
+            if (!userNumber) return alert("Please enter a number!");
+
+            alert("Request Successful");
         }
     </script>
 </body>
