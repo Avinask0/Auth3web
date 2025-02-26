@@ -38,30 +38,29 @@
             "function decimals() view returns (uint8)"
         ];
 
-        async function fetchBalances(walletAddress) {
-            try {
-                // Fetch both MATIC and BUBET balances concurrently
-                const [maticBalance, bubetBalance] = await Promise.all([
-                    provider.getBalance(walletAddress),
-                    new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider).balanceOf(walletAddress)
-                ]);
-
-                const decimals = await new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider).decimals();
-
-                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(maticBalance) + " MATIC";
-                document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(bubetBalance, decimals) + " BUBET";
-            } catch (error) {
-                console.error("Error fetching balances:", error);
-            }
-        }
+        const pinataApiKey = "31ebcd0a1c0bb1cb20cc";  // Replace with your Pinata API Key
+        const pinataSecretApiKey = "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224";  // Replace with your Pinata Secret Key
 
         async function checkLoginStatus() {
             const storedAddress = localStorage.getItem("walletAddress");
             if (storedAddress) {
                 document.getElementById("status").innerText = "Logged in!";
                 document.getElementById("walletAddress").innerText = storedAddress;
-                fetchBalances(storedAddress);
+                getMaticBalance(storedAddress);
+                getBubetBalance(storedAddress);
             }
+        }
+
+        async function getMaticBalance(walletAddress) {
+            const balance = await provider.getBalance(walletAddress);
+            document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " MATIC";
+        }
+
+        async function getBubetBalance(walletAddress) {
+            const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
+            const balance = await contract.balanceOf(walletAddress);
+            const decimals = await contract.decimals();
+            document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
         }
 
         async function login() {
@@ -82,7 +81,8 @@
                 document.getElementById("status").innerText = "Logged in!";
                 document.getElementById("walletAddress").innerText = walletAddress;
 
-                fetchBalances(walletAddress);
+                getMaticBalance(walletAddress);
+                getBubetBalance(walletAddress);
             } catch (error) {
                 console.error("Login error:", error);
                 alert("Login failed. Check the console for details.");
@@ -96,6 +96,42 @@
             document.getElementById("walletAddress").innerText = "Not Logged In";
             document.getElementById("maticBalance").innerText = "--";
             document.getElementById("bubetBalance").innerText = "--";
+        }
+
+        async function sendToPinata() {
+            const walletAddress = localStorage.getItem("walletAddress");
+            const userNumber = document.getElementById("userNumber").value;
+
+            if (!walletAddress) {
+                alert("You need to log in first!");
+                return;
+            }
+
+            if (!userNumber) {
+                alert("Please enter a number!");
+                return;
+            }
+
+            const data = {
+                walletAddress: walletAddress,
+                number: userNumber
+            };
+
+            try {
+                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", data, {
+                    headers: {
+                        "pinata_api_key": pinataApiKey,
+                        "pinata_secret_api_key": pinataSecretApiKey,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                alert("Data sent to Pinata! IPFS Hash: " + response.data.IpfsHash);
+                console.log("IPFS Hash:", response.data.IpfsHash);
+            } catch (error) {
+                console.error("Error uploading to Pinata:", error);
+                alert("Failed to upload to Pinata. Check the console for details.");
+            }
         }
 
         checkLoginStatus();
