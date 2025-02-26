@@ -106,17 +106,28 @@
             width: 100%;
         }
 
-        /* GearBox Popup */
-        #gearboxPopup {
-            position: absolute;
+        /* GearBox Button (Bottom Center) */
+        #gearboxBtn {
+            position: fixed;
             bottom: 20px;
-            right: 20px;
+            background: red;
+            font-size: 18px;
+            width: 150px;
+        }
+
+        /* GearBox Popup (Centered) */
+        #gearboxPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             text-align: left;
-            width: 250px;
+            width: 280px;
+            display: none;
         }
 
         #walletAddress {
@@ -161,30 +172,33 @@
             <button onclick="logout()">Logout</button>
         </div>
 
-        <!-- Balance Section -->
-        <div class="balance-container">
-            <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
-            <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
-        </div>
-
         <!-- My Cabin Section -->
         <div id="cabinScreen" class="hidden cabin">
             <h3>Enter a Number & Send to Pinata</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
             <button onclick="sendToPinata()">Request</button>
 
-            <!-- GearBox Button -->
-            <button id="gearboxBtn" style="background: red; margin-top: 10px;" onclick="toggleGearBox()">GearBox</button>
-
-            <!-- GearBox Popup -->
-            <div id="gearboxPopup" class="hidden">
-                <p><strong>Wallet Address:</strong></p>
-                <p id="walletAddress" onclick="copyToClipboard(this)"></p>
-
-                <p><strong>Wallet Secret:</strong></p>
-                <p id="walletSecret">********</p>
+            <!-- Balance Section (Only appears after My Cabin click) -->
+            <div id="balanceContainer" class="hidden balance-container">
+                <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
+                <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
             </div>
         </div>
+    </div>
+
+    <!-- GearBox Button -->
+    <button id="gearboxBtn" onclick="toggleGearBox()">GearBox</button>
+
+    <!-- GearBox Popup -->
+    <div id="gearboxPopup">
+        <h3>GearBox</h3>
+        <p><strong>Wallet Address:</strong></p>
+        <p id="walletAddress" onclick="copyToClipboard(this)"></p>
+
+        <p><strong>Wallet Secret:</strong></p>
+        <p id="walletSecret">********</p>
+
+        <button onclick="toggleGearBox()">Close</button>
     </div>
 
     <script>
@@ -195,12 +209,19 @@
 
         function toggleCabin() {
             document.getElementById("cabinScreen").classList.toggle("hidden");
+            document.getElementById("balanceContainer").classList.remove("hidden");
+
+            const walletAddress = localStorage.getItem("walletAddress");
+            if (walletAddress) {
+                getMaticBalance(walletAddress);
+                getBubetBalance(walletAddress);
+            }
         }
 
         function toggleGearBox() {
-            document.getElementById("gearboxPopup").classList.toggle("hidden");
+            const popup = document.getElementById("gearboxPopup");
+            popup.style.display = popup.style.display === "block" ? "none" : "block";
 
-            // Load Wallet Address
             const walletAddress = localStorage.getItem("walletAddress") || "Not Logged In";
             document.getElementById("walletAddress").innerText = walletAddress;
         }
@@ -219,36 +240,6 @@
             const balance = await contract.balanceOf(walletAddress);
             const decimals = await contract.decimals();
             document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
-        }
-
-        async function login() {
-            const email = document.getElementById("email").value;
-            if (!email) return alert("Please enter an email");
-
-            try {
-                await magic.auth.loginWithMagicLink({ email });
-                const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
-                const signer = magicProvider.getSigner();
-                const walletAddress = await signer.getAddress();
-
-                localStorage.setItem("walletAddress", walletAddress);
-
-                document.getElementById("loginScreen").classList.add("hidden");
-                document.getElementById("appScreen").classList.remove("hidden");
-
-                getMaticBalance(walletAddress);
-                getBubetBalance(walletAddress);
-            } catch (error) {
-                console.error("Login error:", error);
-                alert("Login failed.");
-            }
-        }
-
-        async function logout() {
-            await magic.user.logout();
-            localStorage.removeItem("walletAddress");
-            document.getElementById("appScreen").classList.add("hidden");
-            document.getElementById("loginScreen").classList.remove("hidden");
         }
     </script>
 </body>
