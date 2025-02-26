@@ -3,57 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Login - Polygon Wallet</title>
+    <title>Login</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
-        input, button { margin: 10px; padding: 10px; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; position: relative; }
+        .hidden { display: none; }
+        .top-right-menu { position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; }
+        button { margin: 10px; padding: 10px; cursor: pointer; }
+        .cabin { margin-top: 50px; }
     </style>
 </head>
 <body>
-    <h2>Login with Magic & Create a Polygon Wallet</h2>
-    
-    <input type="email" id="email" placeholder="Enter your email" />
-    <button onclick="login()">Login</button>
-    
-    <h3 id="status"></h3>
-    <p><strong>Wallet Address:</strong> <span id="walletAddress">Not Logged In</span></p>
-    <p><strong>MATIC Balance:</strong> <span id="maticBalance">--</span></p>
-    <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
-    
-    <button onclick="logout()">Logout</button>
+    <div id="loginScreen">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Enter your email" />
+        <button onclick="login()">Login</button>
+    </div>
 
-    <h3>Enter a Number & Send to Pinata</h3>
-    <input type="number" id="userNumber" placeholder="Enter a number" />
-    <button onclick="sendToPinata()">Request</button>
+    <div id="appScreen" class="hidden">
+        <div class="top-right-menu">
+            <button onclick="toggleCabin()">My Cabin</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <div id="cabinScreen" class="hidden cabin">
+            <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
+            <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
+            <h3>Enter a Number & Send to Pinata</h3>
+            <input type="number" id="userNumber" placeholder="Enter a number" />
+            <button onclick="sendToPinata()">Request</button>
+        </div>
+    </div>
 
     <script>
         const magic = new Magic("pk_live_E0C2532AEA69C41D", { network: "polygon" });
         const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
         const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
-        const ERC20_ABI = [
-            "function balanceOf(address owner) view returns (uint256)",
-            "function decimals() view returns (uint8)"
-        ];
+        const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
 
         const pinataApiKey = "31ebcd0a1c0bb1cb20cc";  // Replace with your Pinata API Key
         const pinataSecretApiKey = "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224";  // Replace with your Pinata Secret Key
 
-        async function checkLoginStatus() {
-            const storedAddress = localStorage.getItem("walletAddress");
-            if (storedAddress) {
-                document.getElementById("status").innerText = "Logged in!";
-                document.getElementById("walletAddress").innerText = storedAddress;
-                getMaticBalance(storedAddress);
-                getBubetBalance(storedAddress);
-            }
+        function toggleCabin() {
+            document.getElementById("cabinScreen").classList.toggle("hidden");
         }
 
         async function getMaticBalance(walletAddress) {
             const balance = await provider.getBalance(walletAddress);
-            document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " MATIC";
+            document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " Fuel";
         }
 
         async function getBubetBalance(walletAddress) {
@@ -65,10 +64,7 @@
 
         async function login() {
             const email = document.getElementById("email").value;
-            if (!email) {
-                alert("Please enter an email");
-                return;
-            }
+            if (!email) return alert("Please enter an email");
 
             try {
                 await magic.auth.loginWithMagicLink({ email });
@@ -78,8 +74,8 @@
 
                 localStorage.setItem("walletAddress", walletAddress);
 
-                document.getElementById("status").innerText = "Logged in!";
-                document.getElementById("walletAddress").innerText = walletAddress;
+                document.getElementById("loginScreen").classList.add("hidden");
+                document.getElementById("appScreen").classList.remove("hidden");
 
                 getMaticBalance(walletAddress);
                 getBubetBalance(walletAddress);
@@ -92,39 +88,26 @@
         async function logout() {
             await magic.user.logout();
             localStorage.removeItem("walletAddress");
-            document.getElementById("status").innerText = "Logged out";
-            document.getElementById("walletAddress").innerText = "Not Logged In";
-            document.getElementById("maticBalance").innerText = "--";
-            document.getElementById("bubetBalance").innerText = "--";
+            document.getElementById("appScreen").classList.add("hidden");
+            document.getElementById("loginScreen").classList.remove("hidden");
         }
 
         async function sendToPinata() {
             const walletAddress = localStorage.getItem("walletAddress");
             const userNumber = document.getElementById("userNumber").value;
 
-            if (!walletAddress) {
-                alert("You need to log in first!");
-                return;
-            }
-
-            if (!userNumber) {
-                alert("Please enter a number!");
-                return;
-            }
-
-            const data = {
-                walletAddress: walletAddress,
-                number: userNumber
-            };
+            if (!walletAddress) return alert("You need to log in first!");
+            if (!userNumber) return alert("Please enter a number!");
 
             try {
-                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", data, {
-                    headers: {
-                        "pinata_api_key": pinataApiKey,
-                        "pinata_secret_api_key": pinataSecretApiKey,
-                        "Content-Type": "application/json"
-                    }
-                });
+                const response = await axios.post("https://api.pinata.cloud/pinning/pinJSONToIPFS", 
+                    { walletAddress, number: userNumber }, 
+                    { headers: { 
+                        "pinata_api_key": pinataApiKey, 
+                        "pinata_secret_api_key": pinataSecretApiKey, 
+                        "Content-Type": "application/json" 
+                    }}
+                );
 
                 alert("Request Successful");
                 console.log("IPFS Hash:", response.data.IpfsHash);
@@ -133,8 +116,6 @@
                 alert("Failed to upload to Pinata. Check the console for details.");
             }
         }
-
-        checkLoginStatus();
     </script>
 </body>
 </html>
