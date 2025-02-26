@@ -106,6 +106,28 @@
             width: 100%;
         }
 
+        /* GearBox Popup */
+        #gearboxPopup {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: left;
+            width: 250px;
+        }
+
+        #walletAddress {
+            cursor: pointer;
+            color: blue;
+        }
+
+        #walletAddress:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 600px) {
             .top-right-menu {
                 flex-direction: column;
@@ -117,16 +139,8 @@
                 padding: 8px 12px;
             }
 
-            #loginScreen {
+            #loginScreen, #appScreen, .balance-container, .cabin {
                 width: 90%;
-            }
-
-            #appScreen {
-                width: 90%;
-            }
-
-            .balance-container, .cabin {
-                width: 100%;
             }
         }
     </style>
@@ -158,6 +172,18 @@
             <h3>Enter a Number & Send to Pinata</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
             <button onclick="sendToPinata()">Request</button>
+
+            <!-- GearBox Button -->
+            <button id="gearboxBtn" style="background: red; margin-top: 10px;" onclick="toggleGearBox()">GearBox</button>
+
+            <!-- GearBox Popup -->
+            <div id="gearboxPopup" class="hidden">
+                <p><strong>Wallet Address:</strong></p>
+                <p id="walletAddress" onclick="copyToClipboard(this)"></p>
+
+                <p><strong>Wallet Secret:</strong></p>
+                <p id="walletSecret">********</p>
+            </div>
         </div>
     </div>
 
@@ -169,6 +195,18 @@
 
         function toggleCabin() {
             document.getElementById("cabinScreen").classList.toggle("hidden");
+        }
+
+        function toggleGearBox() {
+            document.getElementById("gearboxPopup").classList.toggle("hidden");
+
+            // Load Wallet Address
+            const walletAddress = localStorage.getItem("walletAddress") || "Not Logged In";
+            document.getElementById("walletAddress").innerText = walletAddress;
+        }
+
+        function copyToClipboard(element) {
+            navigator.clipboard.writeText(element.innerText);
         }
 
         async function getMaticBalance(walletAddress) {
@@ -202,7 +240,7 @@
                 getBubetBalance(walletAddress);
             } catch (error) {
                 console.error("Login error:", error);
-                alert("Login failed. Check the console for details.");
+                alert("Login failed.");
             }
         }
 
@@ -211,21 +249,6 @@
             localStorage.removeItem("walletAddress");
             document.getElementById("appScreen").classList.add("hidden");
             document.getElementById("loginScreen").classList.remove("hidden");
-        }
-
-        async function sendToPinata() {
-            const walletAddress = localStorage.getItem("walletAddress");
-            const userNumber = document.getElementById("userNumber").value;
-
-            if (!walletAddress) return alert("You need to log in first!");
-            if (!userNumber) return alert("Please enter a number!");
-
-            try {
-                alert("Request Successful");
-            } catch (error) {
-                console.error("Error uploading to Pinata:", error);
-                alert("Failed to upload to Pinata. Check the console for details.");
-            }
         }
     </script>
 </body>
