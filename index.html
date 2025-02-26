@@ -106,11 +106,6 @@
             width: 100%;
         }
 
-        /* Added space above Request Bubbets */
-        .cabin h3 {
-            margin-top: 20px;
-        }
-
         @media (max-width: 600px) {
             .top-right-menu {
                 flex-direction: column;
@@ -152,16 +147,17 @@
             <button onclick="logout()">Logout</button>
         </div>
 
-        <!-- Balance Section (Initially Hidden) -->
-        <div id="cabinScreen" class="hidden cabin">
-            <div class="balance-container">
-                <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
-                <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
-            </div>
+        <!-- Balance Section -->
+        <div class="balance-container">
+            <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
+            <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
+        </div>
 
+        <!-- My Cabin Section -->
+        <div id="cabinScreen" class="hidden cabin">
             <h3>Enter a Number & Send to Pinata</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
-            <button onclick="sendToPinata()">Request Bubbets</button>
+            <button onclick="sendToPinata()">Request</button>
         </div>
     </div>
 
@@ -171,38 +167,20 @@
         const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
         const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
 
-        async function toggleCabin() {
-            const cabinScreen = document.getElementById("cabinScreen");
-            cabinScreen.classList.toggle("hidden");
-
-            // If the cabin is being opened, fetch balances together
-            if (!cabinScreen.classList.contains("hidden")) {
-                fetchBalances();
-            }
+        function toggleCabin() {
+            document.getElementById("cabinScreen").classList.toggle("hidden");
         }
 
-        async function fetchBalances() {
-            const walletAddress = localStorage.getItem("walletAddress");
-            if (!walletAddress) return;
-
-            try {
-                const [maticBalance, bubetBalance] = await Promise.all([
-                    provider.getBalance(walletAddress),
-                    getBubetBalance(walletAddress)
-                ]);
-
-                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(maticBalance) + " Fuel";
-                document.getElementById("bubetBalance").innerText = bubetBalance + " BUBET";
-            } catch (error) {
-                console.error("Error fetching balances:", error);
-            }
+        async function getMaticBalance(walletAddress) {
+            const balance = await provider.getBalance(walletAddress);
+            document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " Fuel";
         }
 
         async function getBubetBalance(walletAddress) {
             const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
             const balance = await contract.balanceOf(walletAddress);
             const decimals = await contract.decimals();
-            return ethers.utils.formatUnits(balance, decimals);
+            document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
         }
 
         async function login() {
@@ -219,6 +197,9 @@
 
                 document.getElementById("loginScreen").classList.add("hidden");
                 document.getElementById("appScreen").classList.remove("hidden");
+
+                getMaticBalance(walletAddress);
+                getBubetBalance(walletAddress);
             } catch (error) {
                 console.error("Login error:", error);
                 alert("Login failed. Check the console for details.");
