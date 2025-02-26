@@ -11,43 +11,88 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; position: relative; }
         .hidden { display: none; }
+
+        /* Top Right Menu */
         .top-right-menu { position: absolute; top: 10px; right: 10px; display: flex; gap: 10px; }
+
         button { padding: 10px 15px; cursor: pointer; border: none; background: #007bff; color: white; border-radius: 5px; font-size: 16px; }
         button:hover { background: #0056b3; }
+
+        /* Login Box */
         #loginScreen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); min-width: 300px; }
+
         input { padding: 10px; margin: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; font-size: 16px; }
+
+        /* Dashboard */
         #appScreen { width: 100%; max-width: 400px; text-align: center; padding-top: 60px; }
+
+        /* Balance Section */
+        .balance-container { background: white; padding: 20px; margin-top: 10px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); text-align: left; width: 100%; }
+        .balance-container p { margin: 10px 0; font-size: 18px; }
+
+        /* Cabin */
         .cabin { background: white; padding: 20px; margin-top: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); width: 100%; }
+
+        /* GearBox Button */
         #gearboxBtn { position: fixed; bottom: 20px; background: red; font-size: 18px; width: 150px; }
-        #gearboxPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); width: 280px; display: none; }
+
+        /* GearBox Pop-up */
+        #gearboxPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            width: 280px;
+            display: none;
+            text-align: left;
+        }
+
         #walletAddress { cursor: pointer; color: blue; }
         #walletAddress:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            .top-right-menu { flex-direction: column; align-items: flex-end; }
+            button { font-size: 14px; padding: 8px 12px; }
+            #loginScreen, #appScreen, .balance-container, .cabin { width: 90%; }
+        }
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
     <div id="loginScreen">
         <h2>Login</h2>
         <input type="email" id="email" placeholder="Enter your email" />
         <button onclick="login()">Login</button>
     </div>
 
+    <!-- App Screen -->
     <div id="appScreen" class="hidden">
         <div class="top-right-menu">
             <button onclick="toggleCabin()">My Cabin</button>
             <button onclick="logout()">Logout</button>
         </div>
+
         <div id="cabinScreen" class="hidden cabin">
             <h3>Enter a Number & Send to Pinata</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
             <button onclick="sendToPinata()">Request</button>
-            <div id="balanceContainer" class="hidden">
+            
+            <!-- Balance Section (Hidden by Default) -->
+            <div id="balanceContainer" class="hidden balance-container">
                 <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
                 <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
             </div>
         </div>
     </div>
 
+    <!-- GearBox Button -->
     <button id="gearboxBtn" onclick="toggleGearBox()">GearBox</button>
+
+    <!-- GearBox Pop-up -->
     <div id="gearboxPopup">
         <h3>GearBox</h3>
         <p><strong>Wallet Address:</strong></p>
@@ -89,62 +134,33 @@
             localStorage.removeItem("walletAddress");
             document.getElementById("appScreen").classList.add("hidden");
             document.getElementById("loginScreen").classList.remove("hidden");
-            console.log("Logged out");
         }
 
-        async function getMaticBalance(walletAddress) {
-            try {
-                const balance = await provider.getBalance(walletAddress);
-                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(balance) + " Fuel";
-            } catch (error) {
-                console.error("Error fetching MATIC balance:", error);
-            }
-        }
+        async function fetchBalances() {
+            const walletAddress = localStorage.getItem("walletAddress");
+            if (!walletAddress) return alert("Login required to fetch balances!");
 
-        async function getBubetBalance(walletAddress) {
-            try {
-                const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
-                const balance = await contract.balanceOf(walletAddress);
-                const decimals = await contract.decimals();
-                document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
-            } catch (error) {
-                console.error("Error fetching BUBET balance:", error);
-            }
+            const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, provider);
+            const balance = await contract.balanceOf(walletAddress);
+            const decimals = await contract.decimals();
+            document.getElementById("bubetBalance").innerText = ethers.utils.formatUnits(balance, decimals) + " BUBET";
+            document.getElementById("maticBalance").innerText = ethers.utils.formatEther(await provider.getBalance(walletAddress)) + " Fuel";
         }
 
         function toggleCabin() {
             document.getElementById("cabinScreen").classList.toggle("hidden");
             document.getElementById("balanceContainer").classList.remove("hidden");
-
-            const walletAddress = localStorage.getItem("walletAddress");
-            if (walletAddress) {
-                getMaticBalance(walletAddress);
-                getBubetBalance(walletAddress);
-            } else {
-                alert("Login required to fetch balances!");
-            }
+            fetchBalances();
         }
 
         function toggleGearBox() {
             const popup = document.getElementById("gearboxPopup");
             popup.style.display = popup.style.display === "block" ? "none" : "block";
-
-            const walletAddress = localStorage.getItem("walletAddress") || "Not Logged In";
-            document.getElementById("walletAddress").innerText = walletAddress;
+            document.getElementById("walletAddress").innerText = localStorage.getItem("walletAddress") || "Not Logged In";
         }
 
         function copyToClipboard(element) {
             navigator.clipboard.writeText(element.innerText);
-        }
-
-        async function sendToPinata() {
-            const walletAddress = localStorage.getItem("walletAddress");
-            const userNumber = document.getElementById("userNumber").value;
-
-            if (!walletAddress) return alert("You need to log in first!");
-            if (!userNumber) return alert("Please enter a number!");
-
-            alert("Request Successful");
         }
     </script>
 </body>
