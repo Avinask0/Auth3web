@@ -126,10 +126,8 @@
         const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
         const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
         const ERC20_ABI = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
-        
-        // Pinata API Credentials
-        const PINATA_API_KEY = "31ebcd0a1c0bb1cb20cc";
-        const PINATA_SECRET_API_KEY = "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224";
+        const PINATA_API_KEY = "your-pinata-api-key";
+        const PINATA_SECRET_API_KEY = "your-pinata-secret-key";
 
         function showLoginScreen() {
             document.getElementById("loginScreen").classList.remove("hidden");
@@ -150,6 +148,23 @@
                 showLoginScreen();
             }
         };
+
+        async function fetchBalances() {
+            const walletAddress = localStorage.getItem("walletAddress");
+            if (!walletAddress) return;
+
+            try {
+                const [maticBalance, bubetBalance] = await Promise.all([
+                    provider.getBalance(walletAddress),
+                    getBubetBalance(walletAddress)
+                ]);
+
+                document.getElementById("maticBalance").innerText = ethers.utils.formatEther(maticBalance) + " Fuel";
+                document.getElementById("bubetBalance").innerText = bubetBalance + " BUBET";
+            } catch (error) {
+                console.error("Error fetching balances:", error);
+            }
+        }
 
         async function sendToPinata() {
             const walletAddress = localStorage.getItem("walletAddress");
