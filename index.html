@@ -8,6 +8,66 @@
     <script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+      .popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none;
+}
+
+.popup-content h3 {
+    margin-bottom: 10px;
+}
+
+.wallet-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.wallet-box input {
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    width: 100%;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.popup-buttons button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+}
+
+.popup-buttons button:hover {
+    background: #0056b3;
+}
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: Arial, sans-serif; 
@@ -121,6 +181,22 @@
         </div>
 
         <div id="cabinScreen" class="hidden cabin">
+            <!-- Withdraw Popup -->
+<div id="withdrawPopup" class="popup hidden">
+    <div class="popup-content">
+        <h3>Withdraw BUBET</h3>
+        <p>Send your BUBET to the wallet below:</p>
+        <div class="wallet-box">
+            <input type="text" id="withdrawAddress" readonly />
+            <button onclick="copyWalletAddress()">Copy</button>
+        </div>
+        <input type="number" id="withdrawAmount" placeholder="Enter BUBET amount" />
+        <div class="popup-buttons">
+            <button onclick="processWithdrawal()">Withdraw Now</button>
+            <button onclick="closePopup()">Cancel</button>
+        </div>
+    </div>
+</div>
             <div class="balance-container">
                 <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
                 <p><strong>Fuel Balance :</strong> <span id="maticBalance">--</span></p>
@@ -135,6 +211,62 @@
     </div>
 
     <script>
+    function withdraw() {
+    const walletAddress = localStorage.getItem("walletAddress");
+
+    if (!walletAddress) {
+        alert("Wallet address not found. Please log in again.");
+        return;
+    }
+
+    // Show the popup
+    document.getElementById("withdrawPopup").classList.remove("hidden");
+    
+    // Set the wallet address in the input field
+    document.getElementById("withdrawAddress").value = walletAddress;
+}
+
+function closePopup() {
+    document.getElementById("withdrawPopup").classList.add("hidden");
+}
+
+function copyWalletAddress() {
+    const walletInput = document.getElementById("withdrawAddress");
+    walletInput.select();
+    walletInput.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    alert("Wallet Address Copied!");
+}
+
+async function processWithdrawal() {
+    const walletAddress = localStorage.getItem("walletAddress");
+    const amount = document.getElementById("withdrawAmount").value;
+
+    if (!walletAddress || !amount) {
+        alert("Please enter an amount to withdraw.");
+        return;
+    }
+
+    try {
+        const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
+        const signer = magicProvider.getSigner();
+        const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, signer);
+
+        // Convert amount to correct decimals
+        const decimals = await contract.decimals();
+        const amountInUnits = ethers.utils.parseUnits(amount, decimals);
+
+        // Send transaction
+        const tx = await contract.transfer(walletAddress, amountInUnits);
+        await tx.wait();
+
+        alert(`Withdrawal Successful! TX: ${tx.hash}`);
+        closePopup();
+    } catch (error) {
+        console.error("Withdrawal Error:", error);
+        alert("Withdrawal failed.");
+    }
+}
     async function sendToPinata() {
     const userNumber = document.getElementById("userNumber").value;
     const walletAddress = localStorage.getItem("walletAddress"); // Retrieve stored wallet address
