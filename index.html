@@ -10,18 +10,22 @@
     <style>
       .popup {
     position: fixed;
-    top: 50%;
+    top: 45%; /* Lower the popup slightly */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -40%); /* Adjust positioning */
     background: white;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    padding: 25px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     width: 90%;
     max-width: 400px;
     text-align: center;
     z-index: 1000;
-}
+    min-height: 280px; /* Increases popup height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures better spacing */
+      }
 
 .hidden {
     display: none;
