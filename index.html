@@ -135,38 +135,46 @@
     </div>
 
     <script>
-        async function sendToPinata() {
-        const userNumber = document.getElementById("userNumber").value;
+    async function sendToPinata() {
+    const userNumber = document.getElementById("userNumber").value;
+    const walletAddress = localStorage.getItem("walletAddress"); // Retrieve stored wallet address
 
-        if (!userNumber) {
-            alert("Please enter a number before sending.");
-            return;
+    if (!userNumber) {
+        alert("Please enter a number before sending.");
+        return;
+    }
+
+    if (!walletAddress) {
+        alert("Wallet address not found. Please log in again.");
+        return;
+    }
+
+    const pinataApiKey = "31ebcd0a1c0bb1cb20cc";
+    const pinataSecretApiKey = "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224";
+    const pinataUrl = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
+
+    const data = {
+        walletAddress: walletAddress, // Include wallet address
+        number: userNumber,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        const response = await axios.post(pinataUrl, data, {
+            headers: {
+                "Content-Type": "application/json",
+                "pinata_api_key": pinataApiKey,
+                "pinata_secret_api_key": pinataSecretApiKey
+            }
+        });
+
+        const ipfsHash = response.data.IpfsHash;
+        alert(`Successful`);
+    } catch (error) {
+        console.error("Error", error);
+        alert("Failed");
+    }
         }
-
-        const pinataApiKey = "31ebcd0a1c0bb1cb20cc";
-        const pinataSecretApiKey = "0c9d18dd61f1967e1d00f7be0b1aa2b0c734ef4f07f23a59e412caf5ece8d224";
-        const pinataUrl = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
-
-        const data = {
-            number: userNumber,
-            timestamp: new Date().toISOString()
-        };
-
-        try {
-            const response = await axios.post(pinataUrl, data, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "pinata_api_key": pinataApiKey,
-                    "pinata_secret_api_key": pinataSecretApiKey
-                }
-            });
-
-            const ipfsHash = response.data.IpfsHash;
-            alert(`Successful`);
-        } catch (error) {
-            console.error("Error", error);
-            alert("Failed.");
-        }}
         const magic = new Magic("pk_live_E0C2532AEA69C41D", { network: "polygon" });
         const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
         const BUBET_ADDRESS = "0xa0C1987aD488f0696E745b1211883825b4A70411";
