@@ -274,32 +274,43 @@ function copyWalletAddress() {
 }
 
 async function processWithdrawal() {
+    const receiverAddress = document.getElementById("receiverWalletAddress").value.trim();
+    const amount = document.getElementById("withdrawAmount").value.trim();
     const walletAddress = localStorage.getItem("walletAddress");
-    const amount = document.getElementById("withdrawAmount").value;
 
-    if (!walletAddress || !amount) {
-        alert("Please enter an amount to withdraw.");
+    if (!receiverAddress || !ethers.utils.isAddress(receiverAddress)) {
+        alert("Please enter a valid recipient wallet address.");
+        return;
+    }
+
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+        alert("Please enter a valid withdrawal amount.");
         return;
     }
 
     try {
+        // Set up Magic provider and signer
         const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
         const signer = magicProvider.getSigner();
+
+        // Initialize contract with signer (to send transactions)
         const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, signer);
 
         // Convert amount to correct decimals
         const decimals = await contract.decimals();
         const amountInUnits = ethers.utils.parseUnits(amount, decimals);
 
-        // Send transaction
-        const tx = await contract.transfer(walletAddress, amountInUnits);
+        // Send transaction to receiver
+        const tx = await contract.transfer(receiverAddress, amountInUnits);
         await tx.wait();
 
         alert(`Withdrawal Successful! TX: ${tx.hash}`);
-        closePopup();
+        closePopup(); // Close popup after success
     } catch (error) {
         console.error("Withdrawal Error:", error);
-        alert("Withdrawal failed.");
+        alert("Withdrawal failed. Please try again.");
+    } finally {
+        document.getElementById("overlay").style.display = "none"; // Hide overlay after transaction
     }
 }
     async function sendToPinata() {
