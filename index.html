@@ -125,9 +125,12 @@
                 <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
                 <p><strong>Fuel Balance:</strong> <span id="maticBalance">--</span></p>
             </div>
-            <h3>Request Bubbets</h3>
+            <h3>Funds</h3>
             <input type="number" id="userNumber" placeholder="Enter a number" />
-            <button onclick="sendToPinata()">Request Bubbets</button>
+            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
+                <button style="flex: 1;" onclick="sendToPinata()">Request</button>
+                <button style="flex: 1;" onclick="withdraw()">Withdraw</button>
+            </div>
         </div>
     </div>
 
