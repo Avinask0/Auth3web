@@ -184,7 +184,14 @@
 <!-- Withdraw Popup -->
 <div id="withdrawPopup" class="popup hidden">
     <div class="popup-content">
-        <h3>Withdraw BUBET</h3>
+        <div style="display: flex; align-items: center; gap: 10px;">
+    <h3>Withdraw BUBET</h3>
+    <button id="copyBtn" onclick="copyWalletAddress()" 
+        style="background: none; border: none; cursor: pointer;">
+        <img id="copyIcon" src="https://cdn-icons-png.flaticon.com/512/1621/1621635.png" 
+            alt="Copy" width="20" height="20" />
+    </button>
+        </div>
         <p>Enter the recipient's wallet address:</p>
         <input type="text" id="receiverWalletAddress" placeholder="Enter wallet address" />
 
@@ -231,11 +238,22 @@ function closePopup() {
 }
 
 function copyWalletAddress() {
-    const walletInput = document.getElementById("withdrawAddress");
-    walletInput.select();
-    walletInput.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    alert("Wallet Address Copied!");
+    const walletAddress = localStorage.getItem("walletAddress");
+    if (!walletAddress) {
+        alert("Wallet address not found. Please log in again.");
+        return;
+    }
+
+    navigator.clipboard.writeText(walletAddress).then(() => {
+        const copyIcon = document.getElementById("copyIcon");
+        copyIcon.src = "https://cdn-icons-png.flaticon.com/512/190/190411.png"; // Change to check icon
+        setTimeout(() => {
+            copyIcon.src = "https://cdn-icons-png.flaticon.com/512/1621/1621635.png"; // Revert to clipboard
+        }, 1500);
+    }).catch(err => {
+        console.error("Copy failed", err);
+        alert("Failed to copy address.");
+    });
 }
 
 async function processWithdrawal() {
