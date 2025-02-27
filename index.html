@@ -181,16 +181,16 @@
         </div>
 
         <div id="cabinScreen" class="hidden cabin">
-            <!-- Withdraw Popup -->
+<!-- Withdraw Popup -->
 <div id="withdrawPopup" class="popup hidden">
     <div class="popup-content">
         <h3>Withdraw BUBET</h3>
-        <p>Send your BUBET to the wallet below:</p>
-        <div class="wallet-box">
-            <input type="text" id="withdrawAddress" readonly />
-            <button onclick="copyWalletAddress()">Copy</button>
-        </div>
+        <p>Enter the recipient's wallet address:</p>
+        <input type="text" id="receiverWalletAddress" placeholder="Enter wallet address" />
+
+        <p>Enter the amount to withdraw:</p>
         <input type="number" id="withdrawAmount" placeholder="Enter BUBET amount" />
+
         <div class="popup-buttons">
             <button onclick="processWithdrawal()">Withdraw Now</button>
             <button onclick="closePopup()">Cancel</button>
