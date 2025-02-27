@@ -231,15 +231,18 @@
         return;
     }
 
+    // Hide the background screen (cabin screen)
+    document.getElementById("cabinScreen").classList.add("hidden");
+
     // Show the popup
     document.getElementById("withdrawPopup").classList.remove("hidden");
-    
-    // Set the wallet address in the input field
-    document.getElementById("withdrawAddress").value = walletAddress;
 }
 
 function closePopup() {
     document.getElementById("withdrawPopup").classList.add("hidden");
+
+    // Show the background screen (cabin screen) again
+    document.getElementById("cabinScreen").classList.remove("hidden");
 }
 
 function copyWalletAddress() {
