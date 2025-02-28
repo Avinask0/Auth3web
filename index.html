@@ -26,6 +26,33 @@
     flex-direction: column;
     justify-content: space-between; /* Ensures better spacing */
       }
+    .ticker-container {
+    width: 100%;
+    overflow: hidden;
+    background: #007bff;
+    color: white;
+    padding: 8px 0;
+    position: absolute;
+    top: 50px; /* Adjusted to position well with the Logout button */
+    left: 0;
+}
+
+.ticker {
+    display: inline-block;
+    white-space: nowrap;
+    animation: tickerScroll 10s linear infinite;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+@keyframes tickerScroll {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
     .login-header {
     position: absolute;
     top: 20px; /* Slightly lower for better balance */
@@ -235,6 +262,11 @@
     <div id="appScreen" class="hidden">
         <div class="top-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 20px; position: absolute; top: 0; left: 0;">
     <h2 style="margin: 0; font-size: 20px; font-weight: bold; color: #333; text-align: left;">Events</h2>
+    <div class="ticker-container">
+    <div class="ticker">
+        <p>🚀 Welcome to Bubbet! Trade on event outcomes using BUBET. 1 BUBET = $0.02176. 📈 Stay updated with the latest events!</p>
+    </div>
+</div>
     <div class="top-right-menu" style="display: flex; gap: 10px;">
         <button onclick="toggleCabin()">My Cabin</button>
         <button onclick="logout()">Logout</button>
