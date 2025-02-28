@@ -68,7 +68,7 @@
     background: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
-    display: flex;
+    display: none; /* Ensure it starts hidden */
     flex-direction: column;
     gap: 5px;
     padding: 10px;
@@ -261,16 +261,15 @@
 </div>
 
     <div id="appScreen" class="hidden">
-        <div class="top-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 20px; position: absolute; top: 0; left: 0;">
-    <h2 style="margin: 0; font-size: 20px; font-weight: bold; color: #333; text-align: left;">Events</h2>
-    <div class="top-right-menu">
+        <div class="top-right-menu">
     <button id="settingsBtn" onclick="toggleSettings()" style="background: none; border: none; cursor: pointer;">
         <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings" width="24" height="24" />
     </button>
-    <div id="settingsMenu" class="hidden">
+    <div id="settingsMenu">
         <button onclick="toggleCabin()">My Cabin</button>
         <button onclick="logout()">Logout</button>
     </div>
+</div>
     </div>
         </div>
 
@@ -335,7 +334,11 @@ function closePopup() {
 }
 function toggleSettings() {
     const menu = document.getElementById("settingsMenu");
-    menu.classList.toggle("hidden");
+    if (menu.style.display === "none" || menu.style.display === "") {
+        menu.style.display = "flex"; // Show menu
+    } else {
+        menu.style.display = "none"; // Hide menu
+    }
 }
 function copyWalletAddress() {
     const walletAddress = localStorage.getItem("walletAddress");
