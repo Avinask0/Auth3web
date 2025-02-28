@@ -274,35 +274,7 @@ function copyWalletAddress() {
 }
 
 async function processWithdrawal() {
-    const senderWallet = localStorage.getItem("walletAddress"); 
-    const recipientWallet = document.getElementById("receiverWalletAddress").value; 
-    const amount = document.getElementById("withdrawAmount").value; 
-
-    if (!senderWallet || !recipientWallet || !amount) {
-        alert("Please enter a valid recipient address and amount.");
-        return;
-    }
-
-    try {
-        const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
-        const signer = magicProvider.getSigner();
-        const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, signer);
-
-        // Convert amount to correct decimals
-        const decimals = await contract.decimals();
-        const amountInUnits = ethers.utils.parseUnits(amount, decimals);
-
-        // Send transaction
-        const tx = await contract.transfer(recipientWallet, amountInUnits);
-        await tx.wait();
-
-        alert(`Withdrawal Successful! TX: ${tx.hash}`);
-        window.open(`https://polygonscan.com/tx/${tx.hash}`, "_blank");
-        closePopup();
-    } catch (error) {
-        console.error("Withdrawal Error:", error);  // Log full error in console
-        alert(`Withdrawal failed: ${error.message || error}`); // Show detailed error
-    }
+    alert("Coming Soon");
 }
     async function sendToPinata() {
     const userNumber = document.getElementById("userNumber").value;
