@@ -189,9 +189,12 @@
     </div>
 
     <div id="appScreen" class="hidden">
-        <div class="top-right-menu">
-            <button onclick="toggleCabin()">My Cabin</button>
-            <button onclick="logout()">Logout</button>
+        <div class="top-right-menu" style="display: flex; justify-content: space-between; width: 100%;">
+    <h2 style="margin: 0; font-size: 18px; font-weight: bold;">Events</h2>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="toggleCabin()">My Cabin</button>
+        <button onclick="logout()">Logout</button>
+    </div>
         </div>
 
         <div id="cabinScreen" class="hidden cabin">
