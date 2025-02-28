@@ -283,20 +283,16 @@ async function processWithdrawal() {
         return;
     }
 
-    console.log("Sender Wallet:", senderWallet);
-    console.log("Recipient Wallet:", recipientWallet);
-    console.log("Withdraw Amount:", amount);
-
     try {
         const magicProvider = new ethers.providers.Web3Provider(magic.rpcProvider);
         const signer = magicProvider.getSigner();
         const contract = new ethers.Contract(BUBET_ADDRESS, ERC20_ABI, signer);
 
+        // Convert amount to correct decimals
         const decimals = await contract.decimals();
         const amountInUnits = ethers.utils.parseUnits(amount, decimals);
-        
-        console.log("Amount in BUBET units:", amountInUnits.toString());
 
+        // Send transaction
         const tx = await contract.transfer(recipientWallet, amountInUnits);
         await tx.wait();
 
@@ -304,8 +300,8 @@ async function processWithdrawal() {
         window.open(`https://polygonscan.com/tx/${tx.hash}`, "_blank");
         closePopup();
     } catch (error) {
-        console.error("Withdrawal Error:", error);
-        alert("Withdrawal failed. Please try again.");
+        console.error("Withdrawal Error:", error);  // Log full error in console
+        alert(`Withdrawal failed: ${error.message || error}`); // Show detailed error
     }
 }
     async function sendToPinata() {
