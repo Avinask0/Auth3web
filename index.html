@@ -28,7 +28,7 @@
       }
     .login-header {
     position: absolute;
-    top: 10px; /* Adjust as needed */
+    top: 20px; /* Slightly lower for better balance */
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
@@ -36,16 +36,25 @@
 }
 
 .login-heading {
-    font-size: 28px;
+    font-size: 32px; /* Larger for better visibility */
     font-weight: bold;
-    margin-bottom: 5px;
+    color: #007bff; /* A nice blue to match buttons */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Light shadow for depth */
+    margin-bottom: 8px;
 }
 
 .login-description {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 10px;
+    font-size: 16px; /* Slightly larger for readability */
+    color: #444; /* Darker text for contrast */
+    max-width: 80%; /* Prevents it from being too wide */
+    margin: 0 auto 15px; /* Centers and adds spacing */
     padding: 0 15px;
+    line-height: 1.4; /* Improves readability */
+}
+
+/* Keeps the login form positioned lower */
+#loginScreen {
+    margin-top: 90px; /* Adjusted to create a better gap */
 }
 
 /* Ensures login form stays where it is */
@@ -210,13 +219,14 @@
 </head>
 <body>
     <div id="loginScreen" class="hidden">
+    <!-- New Header Section for BUBBET -->
     <div class="login-header">
         <h1 class="login-heading">BUBBET</h1>
         <p class="login-description">
-            The future of decentralized event markets. Log in to access your wallet and manage your funds.
-        </p>
+            Bubbet is a ETP (Event Trading Protocol) platform where user can trade on events outcome,using its Native Coin BUBET.BUBBET has maximum supply of a Million Coins.</p>
     </div>
     
+    <!-- Login Form -->
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Enter your email" />
     <button onclick="login()">Login</button>
