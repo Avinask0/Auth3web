@@ -26,19 +26,31 @@
     flex-direction: column;
     justify-content: space-between; /* Ensures better spacing */
       }
-    .login-heading {
+    .login-header {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: 100%;
+}
+
+.login-heading {
     font-size: 28px;
     font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .login-description {
     font-size: 14px;
     color: #666;
-    text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     padding: 0 15px;
+}
+
+/* Ensures login form stays where it is */
+#loginScreen {
+    margin-top: 40px; /* Adjust to lower the login form */
 }
 .overlay {
     position: fixed;
@@ -198,10 +210,13 @@
 </head>
 <body>
     <div id="loginScreen" class="hidden">
-    <h1 class="login-heading">BUBBET</h1>
-    <p class="login-description">
-        The future of decentralized event markets. Log in to access your wallet and manage your funds.
-    </p>
+    <div class="login-header">
+        <h1 class="login-heading">BUBBET</h1>
+        <p class="login-description">
+            The future of decentralized event markets. Log in to access your wallet and manage your funds.
+        </p>
+    </div>
+    
     <h2>Login</h2>
     <input type="email" id="email" placeholder="Enter your email" />
     <button onclick="login()">Login</button>
