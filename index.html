@@ -8,6 +8,28 @@
     <script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+    .close-cabin-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.close-cabin-btn:hover {
+    background: #cc0000;
+}
       .popup {
     position: fixed;
     top: 45%; /* Lower the popup slightly */
@@ -287,10 +309,15 @@
 
         
     </div>
-<div id="cabinPage" class="full-page hidden"></div>
+<div id="cabinPage" class="full-page hidden">
+    <button id="closeCabin" class="close-cabin-btn" onclick="closeCabin()">✖</button>
+</div>
     <script>
     function showCabin() {
     document.getElementById("cabinPage").classList.remove("hidden");
+    }
+    function closeCabin() {
+    document.getElementById("cabinPage").classList.add("hidden");
     }
     function withdraw() {
     const walletAddress = localStorage.getItem("walletAddress");
