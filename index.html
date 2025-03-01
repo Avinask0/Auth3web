@@ -268,46 +268,12 @@
     </div>
 </div>
     <div class="top-right-menu" style="display: flex; gap: 10px;">
-        <button onclick="toggleCabin()">My Cabin</button>
+        <button>My Cabin</button>
         <button onclick="logout()">Logout</button>
     </div>
         </div>
 
-        <div id="cabinScreen" class="hidden cabin">
-<!-- Withdraw Popup -->
-<div id="withdrawPopup" class="popup hidden">
-    <div class="popup-content">
-        <div style="display: flex; align-items: center; gap: 10px;">
-    <h3>Withdraw BUBET</h3>
-    <button id="copyBtn" onclick="copyWalletAddress()" 
-        style="background: none; border: none; cursor: pointer;">
-        <img id="copyIcon" src="https://cdn-icons-png.flaticon.com/512/1621/1621635.png" 
-            alt="Copy" width="20" height="20" />
-    </button>
-        </div>
-        <p>Enter the recipient's wallet address:</p>
-        <input type="text" id="receiverWalletAddress" placeholder="Enter wallet address" />
-
-        <p>Enter the amount to withdraw:</p>
-        <input type="number" id="withdrawAmount" placeholder="Enter BUBET amount" />
-
-        <div class="popup-buttons">
-            <button onclick="processWithdrawal()">Withdraw Now</button>
-            <button onclick="closePopup()">Cancel</button>
-        </div>
-    </div>
-</div>
-            <div class="balance-container">
-                <p><strong>BUBET Balance:</strong> <span id="bubetBalance">--</span></p>
-                <p><strong>Fuel Balance :</strong> <span id="maticBalance">--</span></p>
-            </div>
-            <h3>Funds</h3>
-            <input type="number" id="userNumber" placeholder="1 BUBET = $0.02176" />
-            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
-                <button style="flex: 1;" onclick="sendToPinata()">Request</button>
-                <button style="flex: 1;" onclick="withdraw()">Withdraw</button>
-            </div>
-        </div>
+        
     </div>
 
     <script>
@@ -468,13 +434,7 @@ async function processWithdrawal() {
             showLoginScreen();
         }
 
-        async function toggleCabin() {
-            const cabinScreen = document.getElementById("cabinScreen");
-            if (cabinScreen.classList.contains("hidden")) {
-                await fetchBalances();
-            }
-            cabinScreen.classList.toggle("hidden");
-        }
+        
     </script>
 <div id="overlay" class="overlay"></div>
 </body>
